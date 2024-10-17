@@ -8,14 +8,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export default function AuthPageComponent() {
+export function AuthPageComponent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (email === 'admin@admin.com' && password === 'admin') {
+    if (email === 'admin' && password === 'admin') {
       router.push('/dashboard')
     } else {
       alert('Invalid credentials')
