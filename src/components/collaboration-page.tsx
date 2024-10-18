@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,34 +11,57 @@ import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { X } from 'lucide-react'
 
-// Simulated collaborator data
-const initialCollaborators = [
-  { id: 1, name: 'Alice Johnson', email: 'alice@example.com', avatar: '/placeholder-avatar-1.jpg' },
-  { id: 2, name: 'Bob Smith', email: 'bob@example.com', avatar: '/placeholder-avatar-2.jpg' },
-]
-
+// Collaborator Management Component
 export function CollaborationPageComponent() {
-  const [collaborators, setCollaborators] = useState(initialCollaborators)
+  interface Collaborator {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string;
+  }
+
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([])
   const [newCollaboratorEmail, setNewCollaboratorEmail] = useState('')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
-  const handleAddCollaborator = (e: React.FormEvent) => {
-    e.preventDefault()
-    // In a real application, you would send an invitation to this email
-    // and add the user to the list only after they accept
-    const newCollaborator = {
-      id: collaborators.length + 1,
-      name: newCollaboratorEmail.split('@')[0], // Simple name generation
-      email: newCollaboratorEmail,
-      avatar: `/placeholder-avatar-${collaborators.length + 1}.jpg`,
+  useEffect(() => {
+    fetchCollaborators()
+  }, [])
+
+  // Fetch all collaborators from the API
+  const fetchCollaborators = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5000/collaborators')
+      setCollaborators(response.data)
+    } catch (error) {
+      console.error('Error fetching collaborators:', error)
     }
-    setCollaborators([...collaborators, newCollaborator])
-    setNewCollaboratorEmail('')
-    setIsAddModalOpen(false)
   }
 
-  const handleRemoveCollaborator = (id: number) => {
-    setCollaborators(collaborators.filter(c => c.id !== id))
+  // Add a new collaborator
+  const handleAddCollaborator = async (e: { preventDefault: () => void }) => {
+    e.preventDefault()
+    try {
+      const name = newCollaboratorEmail.split('@')[0]  // Simple name generation
+      const avatar = `/placeholder-avatar-${collaborators.length + 1}.jpg`
+      await axios.post('http://127.0.0.1:5000/collaborators', { name, email: newCollaboratorEmail, avatar })
+      fetchCollaborators()  // Refresh the list
+      setNewCollaboratorEmail('')
+      setIsAddModalOpen(false)
+    } catch (error) {
+      console.error('Error adding collaborator:', error)
+      alert('Error adding collaborator')
+    }
+  }
+
+  // Remove a collaborator
+  const handleRemoveCollaborator = async (id: number) => {
+    try {
+      await axios.delete(`http://127.0.0.1:5000/collaborators/${id}`)
+      fetchCollaborators()  // Refresh the list
+    } catch (error) {
+      console.error('Error removing collaborator:', error)
+    }
   }
 
   return (

@@ -1,18 +1,15 @@
-// stores/authStore.ts
 import { create } from 'zustand';
 
-interface User {
-  email: string;
-}
-
 interface AuthState {
-  user: User | null;
-  login: (user: User) => void;
-  logout: () => void;
+  token: string | null;
+  setToken: (token: string) => void;
+  clearToken: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  login: (user) => set({ user }),
-  logout: () => set({ user: null }),
+const useAuthStore = create<AuthState>((set) => ({
+  token: null,
+  setToken: (token) => set({ token }),
+  clearToken: () => set({ token: null }),
 }));
+
+export default useAuthStore;
